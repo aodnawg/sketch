@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import P5 from "p5";
 
-import makeSketch from "./sketch/1";
+import makeSketch from "./sketch/3";
 
 interface useP5Param {
   height: number;
@@ -25,8 +25,8 @@ const useP5 = ({ height, width }: useP5Param) => {
 };
 
 const Canvas: React.FC = () => {
-  const width = 800;
-  const height = 450;
+  const width = 1024;
+  const height = 1024;
   const ref = useP5({ width, height });
   const style: React.CSSProperties = {
     width: `${width}px`,
