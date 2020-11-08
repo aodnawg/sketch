@@ -4,8 +4,9 @@ import Canvas from "./Canvas";
 const App: React.FC = () => {
   return (
     <div className="App">
-      <div>sketch</div>
-      <Canvas />
+      <div className="flex my-8 mx-16 space-between">
+        <Canvas />
+      </div>
     </div>
   );
 };

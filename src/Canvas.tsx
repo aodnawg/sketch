@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import P5 from "p5";
 
-import makeSketch from "./sketch/3";
+import makeSketch from "./sketch/4";
 
 interface useP5Param {
   height: number;
