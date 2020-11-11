@@ -59,7 +59,8 @@ const sketch = (width: number, height: number) => (p: P5) => {
   p.draw = () => {
     p.noLoop();
     // p.noFill();
-    p.strokeWeight(0.12);
+    const w = p.pow(p.noise(p.frameCount * 0.02) * 0.5, 1.5);
+    p.strokeWeight(w);
 
     p.fill(0);
 
@@ -67,7 +68,7 @@ const sketch = (width: number, height: number) => (p: P5) => {
       return;
     }
 
-    [...Array(1000)].forEach(
+    [...Array(2000)].forEach(
       (_) =>
         (triangle = updateTriangle(p)(
           drawTriangle(p)(makePeriodsFromTriangle(p)(len, center))(triangle!)
