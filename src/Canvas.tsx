@@ -15,7 +15,6 @@ const useP5 = ({ height, width }: useP5Param) => {
       return;
     }
     const p5 = new P5(makeSketch(width, height), ref.current);
-    console.log(p5);
     return () => {
       p5.remove();
     };

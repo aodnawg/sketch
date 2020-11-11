@@ -1,5 +1,14 @@
 import P5 from "p5";
 
+const SIZE = 180;
+const SIZE_RATE = 0.9;
+const VELOCITY = 0.04;
+const VELOCITY_RATE = 4;
+const CIRCLE_QTY = 20;
+const DRAW_COUNT = 5000;
+const STROKE_WEIGHT = 0.15;
+const NOISE_STRENGTH = 0.000001;
+
 type Point = [
   center: P5.Vector,
   length: number,
@@ -7,24 +16,13 @@ type Point = [
   velocity: number
 ];
 
-// const makePointFromPoint = (p: P5) => (len: number, center: P5.Vector) => (
-//   triangle: Triangle
-// ): Periods => {
-//   const periods: Periods = triangle.map(([radius]) => {
-//     const x = p.sin(radius) * len + center.x;
-//     const y = p.cos(radius) * len + center.y;
-//     return p.createVector(x, y);
-//   });
-//   return periods;
-// };
-
 const drawPoint = (p: P5) => (getPointPosFn: typeof getPointPos) => (
   point: Point
 ) => () => {
   const [{ x, y }, length] = point;
-  p.circle(x, y, length * 2);
+  // p.circle(x, y, length * 2);
   const { x: x_, y: y_ } = getPointPosFn(p)(point)();
-  p.circle(x_, y_, 3);
+  p.line(x, y, x_, y_);
 };
 
 const getPointPos = (p: P5) => (point: Point) => (): P5.Vector => {
@@ -39,7 +37,10 @@ const updatePoint = (p: P5) => (point: Point) => (
   if (!originPoint) {
     return [center, length, radius + velocity, velocity];
   } else {
-    return [getPointPos(p)(originPoint)(), length, radius + velocity, velocity];
+    const newCenter = getPointPos(p)(originPoint)();
+    const noise = p.noise(newCenter.x, newCenter.y, p.random() * 100) * 2 - 1;
+    const newVel = velocity + noise * NOISE_STRENGTH;
+    return [newCenter, length, radius + velocity, newVel];
   }
 };
 
@@ -48,53 +49,58 @@ const reproductPoint = (p: P5) => (getPointPosFn: typeof getPointPos) => (
 ) => (): Point => {
   const { x, y } = getPointPosFn(p)(point)();
   const [, length, radius, velocity] = point;
-  return [p.createVector(x, y), length * 0.5, radius, velocity * 1.2];
+  return [
+    p.createVector(x, y),
+    length * SIZE_RATE,
+    radius,
+    velocity * VELOCITY_RATE,
+  ];
 };
 
 const sketch = (width: number, height: number) => (p: P5) => {
   let windowCenter = p.createVector(0, 0);
   let point1: Point | undefined;
-  let point2: Point | undefined;
-  // let Points: Point[] | undefined;
+  let points: Point[] = [];
   p.setup = () => {
     p.resizeCanvas(width, height);
     windowCenter = p.createVector(width / 2, height / 2);
-    point1 = [p.createVector(0, 0), 250, 0, 0.01];
-    point2 = reproductPoint(p)(getPointPos)(point1)();
-
-    // point = reproductPoint(p)(getPointPos(p))(point)();
-    // console.log(point2);
+    point1 = [p.createVector(0, 0), SIZE, 0, VELOCITY];
+    for (let i = 0; i <= CIRCLE_QTY; i++) {
+      points.push(point1);
+      point1 = reproductPoint(p)(getPointPos)(point1)();
+    }
     p.background(230);
   };
 
   p.draw = () => {
-    p.background(230);
-    // p.noLoop();
+    p.frameRate(24);
+    // p.background(230);
+    p.noLoop();
     p.noFill();
-
-    p.strokeWeight(0.3);
-
+    p.strokeWeight(STROKE_WEIGHT);
     p.translate(windowCenter.x, windowCenter.y);
 
-    if (!point1 || !point2) {
-      return;
-    }
-
     const drawP = (point: Point) => (originPoint?: Point) => {
-      drawPoint(p)(getPointPos)(point)();
+      originPoint && drawPoint(p)(getPointPos)(point)();
       return updatePoint(p)(point)(originPoint);
     };
 
-    // let point_ = [...point];
-    // for (let i = 0; i <= 2; i++) {
-    //   point = drawP(point)(reproductPoint(p)(getPointPos)(point)());
-    //   console.log(point);
-    // }
-    point1 = drawP(point1)();
-    point2 = drawP(point2)(point1);
-    // point = point_;
-    // const secondPoint: Point = makePointFromPoint(p)(getPointFn)(point)();
-    // drawPoint(p)(getPointPos(p)(secondPoint))(secondPoint)();
+    const draw = () => {
+      for (let i = 0; i < points.length; i++) {
+        if (i === 0) {
+          points[i] = drawP(points[i])();
+        } else {
+          points[i] = drawP(points[i])(points[i - 1]);
+        }
+      }
+    };
+
+    [...Array(DRAW_COUNT)].forEach((_) => {
+      draw();
+    });
+
+    p.save(`p_${Date.now()}.jpg`);
+    // p.save(`${p.frameCount}.jpg`);
   };
 };
 
