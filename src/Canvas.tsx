@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import P5 from "p5";
 
-import makeSketch from "./sketch/4";
+import makeSketch from "./sketch/8";
 
 interface useP5Param {
   height: number;
@@ -18,6 +18,7 @@ const useP5 = ({ height, width }: useP5Param) => {
     return () => {
       p5.remove();
     };
+    /* eslint-disable-next-line  react-hooks/exhaustive-deps */
   }, []);
 
   return ref;
